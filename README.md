@@ -31,3 +31,7 @@ pytest -q
 ```
 
 See `PROTO.md` for the canonical owner, policy, and safety contract.
+
+## License
+
+[MIT](LICENSE)

@@ -5,6 +5,8 @@ description: >-
   Pure read-only policy over an existing Operator Control fleet snapshot. It
   validates the snapshot and deterministically selects one finding that needs
   attention first, or returns an explicit all-clear result.
+repository: https://github.com/RomeoRaven/operator-policy-plugin
+homepage: https://agent.protolabs.studio
 enabled: false
 requires_plugins: [operator_control]
 capabilities:

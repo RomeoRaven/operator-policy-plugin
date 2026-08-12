@@ -11,11 +11,16 @@ def test_manifest_declares_pure_policy_and_operator_control_dependency():
     assert manifest["id"] == "operator_policy"
     assert manifest["version"] == "0.1.0"
     assert manifest["enabled"] is False
+    assert manifest["repository"] == "https://github.com/RomeoRaven/operator-policy-plugin"
+    assert manifest["homepage"] == "https://agent.protolabs.studio"
     assert manifest["requires_plugins"] == ["operator_control"]
     assert manifest["capabilities"] == {"network": [], "filesystem": "none"}
     assert "config" not in manifest
     assert "secrets" not in manifest
     assert "settings" not in manifest
+    license_text = (ROOT / "LICENSE").read_text()
+    assert license_text.startswith("MIT License\n")
+    assert "Copyright (c) 2026 RomeoRaven" in license_text
 
 
 def test_packaging_and_ci_cover_declared_platforms():
