@@ -62,6 +62,18 @@ def test_rejects_wrong_schema_instead_of_reporting_all_clear():
         raise AssertionError("wrong-schema snapshot was accepted")
 
 
+def test_rejects_missing_snapshot_status_instead_of_reporting_all_clear():
+    malformed = _snapshot()
+    del malformed["status"]
+
+    try:
+        select_attention(malformed)
+    except ValueError as exc:
+        assert str(exc) == "snapshot.status must be ready or attention_required"
+    else:
+        raise AssertionError("missing-status snapshot was accepted")
+
+
 def test_selection_is_input_order_independent_and_preserves_evidence():
     later_target = {
         "code": "target_readiness_attention",
@@ -87,6 +99,30 @@ def test_selection_is_input_order_independent_and_preserves_evidence():
     assert forward["selected_finding"] == first_target
 
 
+def test_exact_documented_ties_use_complete_finding_content_not_input_order():
+    first = {
+        "code": "plugin_configuration_incomplete",
+        "severity": "attention",
+        "scope": "target",
+        "target": "alpha",
+        "observed_at": "2026-08-12T02:30:00Z",
+        "source": "GET /api/runtime/status",
+        "classification": "diagnostic",
+        "evidence": {"plugins": [{"id": "alpha"}]},
+        "safe_next_inspection": "Inspect plugin settings.",
+    }
+    second = {
+        **first,
+        "evidence": {"plugins": [{"id": "zeta"}]},
+    }
+
+    forward = select_attention(_snapshot(second, first))
+    reverse = select_attention(_snapshot(first, second))
+
+    assert forward == reverse
+    assert forward["selected_finding"] == first
+
+
 def test_rejects_malformed_findings_before_ranking():
     malformed = _snapshot({"code": "target_readiness_attention"})
 
@@ -96,3 +132,26 @@ def test_rejects_malformed_findings_before_ranking():
         assert str(exc) == "snapshot.findings[0].severity must be a non-empty string"
     else:
         raise AssertionError("malformed finding was ranked")
+
+
+def test_readiness_status_does_not_reorder_non_readiness_findings():
+    lexical_first = {
+        "code": "plugin_configuration_incomplete",
+        "severity": "attention",
+        "scope": "target",
+        "target": "alpha",
+        "observed_at": "2026-08-12T02:30:00Z",
+        "source": "GET /api/runtime/status",
+        "classification": "diagnostic",
+        "evidence": {"plugins": [{"id": "alpha"}]},
+        "safe_next_inspection": "Inspect plugin settings.",
+    }
+    misleading_status = {
+        **lexical_first,
+        "target": "zeta",
+        "evidence": {"plugins": [{"id": "zeta"}], "status": "unreachable"},
+    }
+
+    result = select_attention(_snapshot(misleading_status, lexical_first))
+
+    assert result["selected_finding"] == lexical_first

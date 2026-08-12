@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 _SELECTION_SCHEMA = "operator.attention_selection.v1"
@@ -32,16 +33,18 @@ def _validate_findings(value: Any) -> list[dict[str, Any]]:
 
 
 def _priority(finding: dict[str, Any]) -> tuple[Any, ...]:
-    evidence = finding.get("evidence")
-    evidence_status = evidence.get("status") if isinstance(evidence, dict) else ""
+    code = str(finding.get("code") or "")
+    evidence: dict[str, Any] = finding["evidence"]
+    evidence_status = evidence.get("status") if code == "target_readiness_attention" else ""
     return (
         _SEVERITY_ORDER.get(str(finding.get("severity") or "").lower(), 4),
-        _CODE_ORDER.get(str(finding.get("code") or ""), 3),
+        _CODE_ORDER.get(code, 3),
         _READINESS_ORDER.get(str(evidence_status or ""), 3),
         str(finding.get("target") or ""),
         str(finding.get("code") or ""),
         str(finding.get("source") or ""),
         str(finding.get("observed_at") or ""),
+        json.dumps(finding, sort_keys=True, separators=(",", ":"), ensure_ascii=True),
     )
 
 
@@ -53,7 +56,12 @@ def select_attention(snapshot: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(f"snapshot.schema_version must be {_SOURCE_SCHEMA}")
     if not isinstance(snapshot.get("observed_at"), str) or not snapshot["observed_at"].strip():
         raise ValueError("snapshot.observed_at must be a non-empty string")
+    status = snapshot.get("status")
+    if status not in {"ready", "attention_required"}:
+        raise ValueError("snapshot.status must be ready or attention_required")
     findings = _validate_findings(snapshot.get("findings"))
+    if (status == "ready") != (not findings):
+        raise ValueError("snapshot.status must agree with whether findings are present")
     selected = min(findings, key=_priority) if findings else None
     return {
         "schema_version": _SELECTION_SCHEMA,

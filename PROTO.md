@@ -34,7 +34,8 @@ The v1 priority tuple is deterministic and documented:
 1. severity: `critical`, `attention`, `warning`, `info`, then unknown;
 2. finding category: target readiness, incomplete enabled plugin, fleet version skew, then unknown;
 3. target-readiness state: unreachable, degraded, not ready;
-4. stable target ID, finding code, source, and observation time.
+4. stable target ID, finding code, source, and observation time;
+5. canonical complete finding content as the final total-order fallback.
 
 The policy prioritizes loss of visibility first. It does not guess which runtime version is intended, change finding evidence, or authorize action.
 
@@ -42,7 +43,7 @@ The policy prioritizes loss of visibility first. It does not guess which runtime
 
 - Pure function and pure tool wrapper: no network, filesystem, config, secrets, background surface, scheduler, notification, or remediation.
 - Requires `operator_control` as a host plugin dependency but does not import or call its implementation.
-- Wrong schema or malformed finding envelopes fail closed as `invalid_snapshot` at the tool seam.
+- Wrong schema, missing/inconsistent top-level status, or malformed finding envelopes fail closed as `invalid_snapshot` at the tool seam.
 - Input order cannot change the selected result.
 - The selected finding is returned unchanged so provenance remains auditable.
 - Unknown future finding codes sort after known v1 categories rather than being discarded.
