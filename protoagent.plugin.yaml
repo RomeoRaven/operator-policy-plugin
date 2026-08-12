@@ -1,0 +1,12 @@
+id: operator_policy
+name: Operator Attention Policy
+version: 0.1.0
+description: >-
+  Pure read-only policy over an existing Operator Control fleet snapshot. It
+  validates the snapshot and deterministically selects one finding that needs
+  attention first, or returns an explicit all-clear result.
+enabled: false
+requires_plugins: [operator_control]
+capabilities:
+  network: []
+  filesystem: none
