@@ -6,6 +6,8 @@ This is the repository's single agent-grounding source.
 
 This standalone protoAgent plugin is the executable policy member of `RomeoRaven/operator-stack`, tracked by `RomeoRaven/protoAgent` issue #2. It owns only validation and deterministic attention selection over an existing `operator.fleet_snapshot.v1` result.
 
+Minimum declared protoAgent version is 0.131.3, the earliest retained bundle-integrated host baseline for this implementation. The current qualification host candidate is RR protoAgent 0.136.0 at `1d80d15e229ac51a419b53c3378db1bea4796379`; that identity is a campaign baseline, not installed-runtime acceptance.
+
 `RomeoRaven/operator-plugin` owns fleet collection, normalization, finding construction, source attribution, and secret handling. protoAgent core owns fleet telemetry aggregation/UI and generic operating guidance. Do not move those responsibilities here.
 
 ## Interface
