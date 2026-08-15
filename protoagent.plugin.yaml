@@ -1,6 +1,7 @@
 id: operator_policy
 name: Operator Attention Policy
 version: 0.1.0
+min_protoagent_version: "0.131.3"
 description: >-
   Pure read-only policy over an existing Operator Control fleet snapshot. It
   validates the snapshot and deterministically selects one finding that needs
